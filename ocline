@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+# OCLine is a work in progress, written by Nathan Krantz-Fire. https://github.com/zippynk/ocline
+
+# (c) Copyright 2015 Nathan Krantz-Fire. All rights reserved.
+
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import sys
+if len(sys.argv) > 2:
+    otherArgs = sys.argv[2:len(sys.argv)]
+else:
+    otherArgs = []
+if len(sys.argv) > 1:
+    filepath = sys.argv[1]
+    try:
+        if "--write" in otherArgs:
+            filefile = open(filepath,"rw")
+        elif "--new" in otherArgs:
+            filefile = open(filepath,"w+")
+        else:
+            filefile = open(filepath,"r")
+    except IOError:
+        sys.stdout.write("ERROR: File does not exist.\n")
+        exit(-1)
+else:
+    filefile = sys.stdin
+if "--new" in otherArgs:
+    filelines = []
+else:
+    filelines = filefile.readlines()
+for i in range(len(filelines)):
+    filelines[i] = filelines[i].strip("\n")
+continueOn = True
+sys.stdin = open('/dev/tty')
+sys.stdin.flush() # change to import sys if this doesn't do it
+for i in range(len(filelines)):
+    try:
+        sys.stdout.write(filelines[i]+" ")
+        response = sys.stdin.readline().strip("\n")
+        if "--write" in otherArgs and not response == "":
+            filelines[i] = "" if response == "[BLANK]" else response
+    except KeyboardInterrupt:
+        sys.stdout.write("\n")
+        continueOn = False
+        break
+if ("--write" in otherArgs or "--new" in otherArgs) and continueOn:
+    while True:
+        try:
+            linestoadd = sys.stdin.readlines()
+        except KeyboardInterrupt:
+            sys.stdout.write("\n")
+            break
+        for i in linestoadd:
+            filelines.append(i.strip("\n"))
+sys.stdin.flush() # change to import sys if this doesn't do it
+if "--write" in otherArgs or "--new" in otherArgs:
+    sys.stdout.write("Save changes to file? [y/n] ")
+    toSave = sys.stdin.readline().strip("\n")
+    if toSave.lower() in ["yes","y","yeah","yup","ya","yep"]:
+        print filelines
+        filefile.write("\n".join(filelines))
+        sys.stdout.write("Saved changes.\n")
+    else:
+        sys.stdout.write("Aborting.\n")
+filefile.close()
