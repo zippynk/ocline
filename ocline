@@ -34,8 +34,9 @@ else:
 for i in range(len(filelines)):
     filelines[i] = filelines[i].strip("\n")
 continueOn = True
-sys.stdin = open('/dev/tty')
-sys.stdin.flush() # change to import sys if this doesn't do it
+if len(sys.argv) < 2: # if the problem is that this solution isn't working, we might as well only call it when it actually does something. I'll work on finding another way later.
+    sys.stdin = open('/dev/tty')
+    sys.stdin.flush() # change to import sys if this doesn't do it
 for i in range(len(filelines)):
     try:
         sys.stdout.write(filelines[i]+" ")
